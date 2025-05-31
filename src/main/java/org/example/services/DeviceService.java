@@ -20,12 +20,12 @@ public class DeviceService {
     public void createDevice(CreateDeviceDto device) throws SQLException {
         String script = "INSERT INTO devices (brand_name, device_name, device_description, min_value, max_value, default_value) VALUES (?, ?, ?, ?, ?, ?)";
         try(Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(script)){
-            statement.setString(1, device.getBrandName());
-            statement.setString(2, device.getDeviceName());
-            statement.setString(3, device.getDeviceDescription());
-            statement.setInt(4, device.getDeviceConfiguration().getMinValue());
-            statement.setInt(5, device.getDeviceConfiguration().getMaxValue());
-            statement.setInt(6, device.getDeviceConfiguration().getDefaultValue());
+            statement.setString(1, device.brandName());
+            statement.setString(2, device.deviceName());
+            statement.setString(3, device.deviceDescription());
+            statement.setInt(4, device.deviceConfiguration().minValue());
+            statement.setInt(5, device.deviceConfiguration().maxValue());
+            statement.setInt(6, device.deviceConfiguration().defaultValue());
             statement.executeUpdate();
         }
     }
