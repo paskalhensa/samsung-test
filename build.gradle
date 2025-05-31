@@ -18,6 +18,7 @@ repositories {
 dependencies {
     runtimeOnly "org.slf4j:slf4j-simple:1.7.36"
     implementation "io.ratpack:ratpack-guice:2.0.0-rc-1"
+    implementation "com.microsoft.sqlserver:mssql-jdbc:12.6.1.jre11"
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
