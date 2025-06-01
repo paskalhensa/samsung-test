@@ -1,9 +1,6 @@
 package org.example.services;
 
-import org.example.dtos.AvailableDeviceDto;
-import org.example.dtos.CreateDeviceDto;
-import org.example.dtos.GetDeviceDto;
-import org.example.dtos.RegisteredDeviceDto;
+import org.example.dtos.*;
 import org.example.utils.DataSourceProvider;
 
 import java.sql.*;
@@ -163,6 +160,18 @@ public class DeviceService {
                     ));
                 }
                 return devices;
+            }
+        }
+    }
+
+    public void updateDeviceValue(Integer userId, UpdateValueDto device) throws SQLException {
+        String script = "UPDATE user_devices SET current_value = ? WHERE id = ? AND user_id = ?";
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setInt(1, device.value());
+            statement.setInt(2, device.userDeviceId());
+            statement.setInt(3, userId);
+            if(statement.executeUpdate() == 0){
+                throw new SQLException("Device to be updated not found.");
             }
         }
     }

@@ -23,6 +23,7 @@ public class Main {
                     bindings.bind(GetAvailableDeviceHandler.class);
                     bindings.bind(RegisterDeviceHandler.class);
                     bindings.bind(GetRegisteredDeviceHandler.class);
+                    bindings.bind(UpdateValueHandler.class);
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
@@ -44,6 +45,7 @@ public class Main {
                                                 .byMethod(method -> method
                                                         .post(RegisterDeviceHandler.class)
                                                         .get(GetRegisteredDeviceHandler.class)
+                                                        .patch(UpdateValueHandler.class)
                                                 )
                                         )
                                 )
