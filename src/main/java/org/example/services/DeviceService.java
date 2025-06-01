@@ -3,6 +3,7 @@ package org.example.services;
 import org.example.dtos.AvailableDeviceDto;
 import org.example.dtos.CreateDeviceDto;
 import org.example.dtos.GetDeviceDto;
+import org.example.dtos.RegisteredDeviceDto;
 import org.example.utils.DataSourceProvider;
 
 import java.sql.*;
@@ -136,6 +137,32 @@ public class DeviceService {
                 } else {
                     throw new SQLException("Failed to retrieve device's default value");
                 }
+            }
+        }
+    }
+
+    public List<RegisteredDeviceDto> getRegisteredDevice(Integer id) throws SQLException {
+        String script = "SELECT ud.id userDeviceId, d.id deviceId, brand_name, device_name, device_description, min_value, max_value, default_value, current_value FROM " +
+                "devices d JOIN user_devices ud ON d.id = ud.device_id WHERE ud.user_id = ?";
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setInt(1, id);
+            List<RegisteredDeviceDto> devices = new ArrayList<>();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    devices.add(new RegisteredDeviceDto(
+                            resultSet.getInt("userDeviceId"),
+                            resultSet.getInt("deviceId"),
+                            resultSet.getString("brand_name"),
+                            resultSet.getString("device_name"),
+                            resultSet.getString("device_description"),
+                            new CreateDeviceDto.DeviceConfigurationDto(
+                                    resultSet.getInt("min_value"),
+                                    resultSet.getInt("max_value"),
+                                    resultSet.getInt("default_value")),
+                            resultSet.getInt("current_value")
+                    ));
+                }
+                return devices;
             }
         }
     }

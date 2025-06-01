@@ -22,6 +22,7 @@ public class Main {
                     bindings.bind(RegisterHandler.class);
                     bindings.bind(GetAvailableDeviceHandler.class);
                     bindings.bind(RegisterDeviceHandler.class);
+                    bindings.bind(GetRegisteredDeviceHandler.class);
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
@@ -41,7 +42,10 @@ public class Main {
                                         .get("available-devices", GetAvailableDeviceHandler.class)
                                         .path("devices", devices -> devices
                                                 .byMethod(method -> method
-                                                        .post(RegisterDeviceHandler.class)))
+                                                        .post(RegisterDeviceHandler.class)
+                                                        .get(GetRegisteredDeviceHandler.class)
+                                                )
+                                        )
                                 )
                         )
                 )
