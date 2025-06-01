@@ -1,3 +1,18 @@
+CREATE TABLE users (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(100) NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    created_at DATETIME DEFAULT SYSDATETIME()
+);
+
+CREATE TABLE countries (
+    code CHAR(2) PRIMARY KEY,
+    country_name VARCHAR(100) NOT NULL
+);
+
+GO
+
 CREATE TABLE devices (
     id INT IDENTITY(1,1) PRIMARY KEY,
     brand_name VARCHAR(100) NOT NULL,
@@ -8,21 +23,9 @@ CREATE TABLE devices (
     default_value INT NOT NULL,
     created_at DATETIME,
     updated_at DATETIME,
-    deleted_at DATETIME
-);
-
-CREATE TABLE countries (
-    code CHAR(2) PRIMARY KEY,
-    country_name VARCHAR(100) NOT NULL
-);
-
-
-CREATE TABLE users (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password_hash VARCHAR(100) NOT NULL,
-    role VARCHAR(20) NOT NULL,
-    created_at DATETIME DEFAULT SYSDATETIME()
+    deleted_at DATETIME,
+    user_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 GO
@@ -36,8 +39,6 @@ CREATE TABLE smartthings_user_profiles (
     FOREIGN KEY (country_code) REFERENCES countries(code),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
-
-GO
 
 CREATE TABLE user_devices (
     id INT IDENTITY(1,1) PRIMARY KEY,

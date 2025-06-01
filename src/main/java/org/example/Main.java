@@ -1,5 +1,6 @@
 package org.example;
 
+import org.example.handlers.AuthHandler;
 import org.example.handlers.CreateDeviceHandler;
 import org.example.handlers.LoginHandler;
 import org.example.services.DeviceService;
@@ -22,6 +23,13 @@ public class Main {
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
-                        .post("api/devices", CreateDeviceHandler.class)));
+                        .prefix("api", api -> api
+                                .prefix("vendor", vendor -> vendor
+                                        .all(new AuthHandler("vendor"))
+                                        .post("devices", CreateDeviceHandler.class)
+                                )
+                        )
+                )
+        );
     }
 }

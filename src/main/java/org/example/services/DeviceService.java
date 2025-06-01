@@ -8,11 +8,11 @@ import java.time.LocalDateTime;
 
 public class DeviceService {
 
-    public void createDevice(CreateDeviceDto device) throws SQLException {
+    public void createDevice(CreateDeviceDto device, Integer userId) throws SQLException {
         try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
             connection.setAutoCommit(false);
             try {
-                Integer deviceId = insertDevice(connection, device);
+                Integer deviceId = insertDevice(connection, device, userId);
                 for(String country : device.targetCountry()){
                     insertTargetCountry(connection, deviceId, country);
                 }
@@ -33,8 +33,8 @@ public class DeviceService {
         }
     }
 
-    private Integer insertDevice(Connection connection, CreateDeviceDto device) throws SQLException {
-        String script = "INSERT INTO devices (brand_name, device_name, device_description, min_value, max_value, default_value, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private Integer insertDevice(Connection connection, CreateDeviceDto device, Integer userId) throws SQLException {
+        String script = "INSERT INTO devices (brand_name, device_name, device_description, min_value, max_value, default_value, created_at, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(script, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, device.brandName());
             statement.setString(2, device.deviceName());
@@ -43,6 +43,7 @@ public class DeviceService {
             statement.setInt(5, device.deviceConfiguration().maxValue());
             statement.setInt(6, device.deviceConfiguration().defaultValue());
             statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setInt(8, userId);
             statement.executeUpdate();
             try (ResultSet resultSet = statement.getGeneratedKeys()) {
                 if(resultSet.next()){

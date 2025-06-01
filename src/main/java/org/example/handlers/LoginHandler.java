@@ -28,7 +28,7 @@ public class LoginHandler implements Handler {
             if (user == null || !BCrypt.checkpw(login.password(), user.password())) {
                 context.getResponse().status(401).send(new ObjectMapper().writeValueAsString(new ResponseDto(false, "Invalid credentials", null, null)));
             } else {
-                context.getResponse().status(200).send(new ObjectMapper().writeValueAsString(new ResponseDto(true, "Login Success", Map.of("token", JwtUtil.generateToken(user.username(), user.role())), null)));
+                context.getResponse().status(200).send(new ObjectMapper().writeValueAsString(new ResponseDto(true, "Login Success", Map.of("token", JwtUtil.generateToken(user.id(), user.username(), user.role())), null)));
             }
         });
     }
