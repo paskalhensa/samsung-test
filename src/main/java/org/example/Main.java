@@ -2,6 +2,7 @@ package org.example;
 
 import org.example.handlers.AuthHandler;
 import org.example.handlers.CreateDeviceHandler;
+import org.example.handlers.GetDeviceHandler;
 import org.example.handlers.LoginHandler;
 import org.example.services.DeviceService;
 import org.example.services.UserService;
@@ -20,13 +21,17 @@ public class Main {
                     bindings.bind(UserService.class);
                     bindings.bind(CreateDeviceHandler.class);
                     bindings.bind(LoginHandler.class);
+                    bindings.bind(GetDeviceHandler.class);
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
                         .prefix("api", api -> api
                                 .prefix("vendor", vendor -> vendor
                                         .all(new AuthHandler("vendor"))
-                                        .post("devices", CreateDeviceHandler.class)
+                                        .path("devices", devices -> devices
+                                                .byMethod(method -> method
+                                                        .get(GetDeviceHandler.class)
+                                                        .post(CreateDeviceHandler.class)))
                                 )
                         )
                 )

@@ -1,10 +1,13 @@
 package org.example.services;
 
 import org.example.dtos.CreateDeviceDto;
+import org.example.dtos.GetDeviceDto;
 import org.example.utils.DataSourceProvider;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DeviceService {
 
@@ -13,7 +16,7 @@ public class DeviceService {
             connection.setAutoCommit(false);
             try {
                 Integer deviceId = insertDevice(connection, device, userId);
-                for(String country : device.targetCountry()){
+                for (String country : device.targetCountry()) {
                     insertTargetCountry(connection, deviceId, country);
                 }
                 connection.commit();
@@ -26,7 +29,7 @@ public class DeviceService {
 
     private void insertTargetCountry(Connection connection, Integer deviceId, String country) throws SQLException {
         String script = "INSERT INTO device_target_countries (country_code, device_id) VALUES (?, ?)";
-        try(PreparedStatement statement = connection.prepareStatement(script)){
+        try (PreparedStatement statement = connection.prepareStatement(script)) {
             statement.setString(1, country);
             statement.setInt(2, deviceId);
             statement.executeUpdate();
@@ -46,7 +49,7 @@ public class DeviceService {
             statement.setInt(8, userId);
             statement.executeUpdate();
             try (ResultSet resultSet = statement.getGeneratedKeys()) {
-                if(resultSet.next()){
+                if (resultSet.next()) {
                     return resultSet.getInt(1);
                 } else {
                     throw new SQLException("Failed to retrieve device Id");
@@ -55,4 +58,21 @@ public class DeviceService {
         }
     }
 
+    public List<GetDeviceDto> getDevice(Integer id) throws SQLException {
+        String script = "SELECT brand_name, device_name, device_description FROM devices WHERE user_id = ?";
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setInt(1, id);
+            List<GetDeviceDto> devices = new ArrayList<>();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    devices.add(new GetDeviceDto(
+                            resultSet.getString("brand_name"),
+                            resultSet.getString("device_name"),
+                            resultSet.getString("device_description")
+                    ));
+                }
+                return devices;
+            }
+        }
+    }
 }
