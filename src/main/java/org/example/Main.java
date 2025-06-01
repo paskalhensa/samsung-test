@@ -21,6 +21,7 @@ public class Main {
                     bindings.bind(GetDeviceHandler.class);
                     bindings.bind(RegisterHandler.class);
                     bindings.bind(GetAvailableDeviceHandler.class);
+                    bindings.bind(RegisterDeviceHandler.class);
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
@@ -37,9 +38,10 @@ public class Main {
                                 )
                                 .prefix("users", user -> user
                                         .all(new AuthHandler("client"))
+                                        .get("available-devices", GetAvailableDeviceHandler.class)
                                         .path("devices", devices -> devices
                                                 .byMethod(method -> method
-                                                        .get(GetAvailableDeviceHandler.class)))
+                                                        .post(RegisterDeviceHandler.class)))
                                 )
                         )
                 )

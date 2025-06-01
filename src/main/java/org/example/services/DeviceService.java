@@ -101,4 +101,42 @@ public class DeviceService {
             }
         }
     }
+
+    public void registerDevice(Integer userId, Integer deviceId) throws SQLException {
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
+            Integer defaultValue = getDefaultValue(connection, deviceId);
+            connection.setAutoCommit(false);
+            try {
+                insertUserDevice(connection, userId, deviceId, defaultValue);
+                connection.commit();
+            } catch (Exception e) {
+                connection.rollback();
+                throw e;
+            }
+        }
+    }
+
+    private void insertUserDevice(Connection connection, Integer userId, Integer deviceId, Integer defaultValue) throws SQLException {
+        String script = "INSERT INTO user_devices (user_id, device_id, current_value) VALUES (?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setInt(1, userId);
+            statement.setInt(2, deviceId);
+            statement.setInt(3, defaultValue);
+            statement.executeUpdate();
+        }
+    }
+
+    private Integer getDefaultValue(Connection connection, Integer deviceId) throws SQLException {
+        String script = "SELECT default_value FROM devices WHERE id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setInt(1, deviceId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                } else {
+                    throw new SQLException("Failed to retrieve device's default value");
+                }
+            }
+        }
+    }
 }
