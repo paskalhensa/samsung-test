@@ -23,7 +23,9 @@ public class JwtUtil {
                 .signWith(key, SignatureAlgorithm.HS256).compact();
     }
     public static AuthenticatedUserDto decodeToken(String token){
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key).build()
+                .parseClaimsJws(token).getBody();
         return new AuthenticatedUserDto(claims.get("userId", Integer.class), claims.getSubject(), claims.get("role", String.class));
     }
 }

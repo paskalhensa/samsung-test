@@ -22,9 +22,11 @@ public class Main {
                     bindings.bind(CreateDeviceHandler.class);
                     bindings.bind(LoginHandler.class);
                     bindings.bind(GetDeviceHandler.class);
+                    bindings.bind(RegisterHandler.class);
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
+                        .post("register", RegisterHandler.class)
                         .prefix("api", api -> api
                                 .prefix("vendor", vendor -> vendor
                                         .all(new AuthHandler("vendor"))
