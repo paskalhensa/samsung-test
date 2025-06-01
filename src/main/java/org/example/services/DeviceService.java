@@ -1,22 +1,15 @@
 package org.example.services;
 
-import org.example.config.DbConfig;
 import org.example.dtos.CreateDeviceDto;
+import org.example.utils.DataSourceProvider;
 
-import javax.inject.Inject;
 import java.sql.*;
 import java.time.LocalDateTime;
 
 public class DeviceService {
-    private final DbConfig dbConfig;
-
-    @Inject
-    public DeviceService(DbConfig dbConfig) {
-        this.dbConfig = dbConfig;
-    }
 
     public void createDevice(CreateDeviceDto device) throws SQLException {
-        try (Connection connection = getConnection()) {
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
             connection.setAutoCommit(false);
             try {
                 Integer deviceId = insertDevice(connection, device);
@@ -61,7 +54,4 @@ public class DeviceService {
         }
     }
 
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(dbConfig.url(), dbConfig.username(), dbConfig.password());
-    }
 }
