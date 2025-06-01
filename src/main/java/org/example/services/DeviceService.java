@@ -1,5 +1,6 @@
 package org.example.services;
 
+import org.example.dtos.AvailableDeviceDto;
 import org.example.dtos.CreateDeviceDto;
 import org.example.dtos.GetDeviceDto;
 import org.example.utils.DataSourceProvider;
@@ -69,6 +70,30 @@ public class DeviceService {
                             resultSet.getString("brand_name"),
                             resultSet.getString("device_name"),
                             resultSet.getString("device_description")
+                    ));
+                }
+                return devices;
+            }
+        }
+    }
+
+    public List<AvailableDeviceDto> getAvailableDevice(Integer id) throws SQLException {
+        String script = "SELECT brand_name, device_name, device_description, min_value, max_value, default_value FROM " +
+                "devices d JOIN device_target_countries dtc ON d.id = dtc.device_id " +
+                "JOIN smartthings_user_profiles sup ON sup.country_code = dtc.country_code WHERE sup.user_id = ?";
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setInt(1, id);
+            List<AvailableDeviceDto> devices = new ArrayList<>();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    devices.add(new AvailableDeviceDto(
+                            resultSet.getString("brand_name"),
+                            resultSet.getString("device_name"),
+                            resultSet.getString("device_description"),
+                            new CreateDeviceDto.DeviceConfigurationDto(
+                                    resultSet.getInt("min_value"),
+                                    resultSet.getInt("max_value"),
+                                    resultSet.getInt("default_value"))
                     ));
                 }
                 return devices;

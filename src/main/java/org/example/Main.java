@@ -1,9 +1,6 @@
 package org.example;
 
-import org.example.handlers.AuthHandler;
-import org.example.handlers.CreateDeviceHandler;
-import org.example.handlers.GetDeviceHandler;
-import org.example.handlers.LoginHandler;
+import org.example.handlers.*;
 import org.example.services.DeviceService;
 import org.example.services.UserService;
 import org.example.utils.DataSourceProvider;
@@ -23,6 +20,7 @@ public class Main {
                     bindings.bind(LoginHandler.class);
                     bindings.bind(GetDeviceHandler.class);
                     bindings.bind(RegisterHandler.class);
+                    bindings.bind(GetAvailableDeviceHandler.class);
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
@@ -33,7 +31,15 @@ public class Main {
                                         .path("devices", devices -> devices
                                                 .byMethod(method -> method
                                                         .get(GetDeviceHandler.class)
-                                                        .post(CreateDeviceHandler.class)))
+                                                        .post(CreateDeviceHandler.class)
+                                                )
+                                        )
+                                )
+                                .prefix("users", user -> user
+                                        .all(new AuthHandler("client"))
+                                        .path("devices", devices -> devices
+                                                .byMethod(method -> method
+                                                        .get(GetAvailableDeviceHandler.class)))
                                 )
                         )
                 )
