@@ -78,7 +78,7 @@ public class DeviceService {
     }
 
     public List<AvailableDeviceDto> getAvailableDevice(Integer id) throws SQLException {
-        String script = "SELECT brand_name, device_name, device_description, min_value, max_value, default_value FROM " +
+        String script = "SELECT d.id, brand_name, device_name, device_description, min_value, max_value, default_value FROM " +
                 "devices d JOIN device_target_countries dtc ON d.id = dtc.device_id " +
                 "JOIN smartthings_user_profiles sup ON sup.country_code = dtc.country_code WHERE sup.user_id = ?";
         try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
@@ -87,6 +87,7 @@ public class DeviceService {
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
                     devices.add(new AvailableDeviceDto(
+                            resultSet.getInt("id"),
                             resultSet.getString("brand_name"),
                             resultSet.getString("device_name"),
                             resultSet.getString("device_description"),
