@@ -27,6 +27,7 @@ public class Main {
                     bindings.bind(UnregisterDeviceHandler.class);
                     bindings.bind(UpdateDeviceHandler.class);
                     bindings.bind(DeleteDeviceHandler.class);
+                    bindings.bind(GetVendorDeviceHandler.class);
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
@@ -54,6 +55,10 @@ public class Main {
                                                         .delete(UnregisterDeviceHandler.class)
                                                 )
                                         )
+                                )
+                                .prefix("admin", admin -> admin
+                                        .all(new AuthHandler("admin"))
+                                        .get("devices", GetVendorDeviceHandler.class)
                                 )
                         )
                 )
