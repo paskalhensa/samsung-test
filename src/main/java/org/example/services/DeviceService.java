@@ -249,7 +249,7 @@ public class DeviceService {
             List<GetVendorDeviceDto> devices = new ArrayList<>();
             while (resultSet.next()){
                 devices.add(new GetVendorDeviceDto(
-                        resultSet.getString("brand_name"),
+                        resultSet.getString("device_name"),
                         resultSet.getInt("count")
                 ));
             }
