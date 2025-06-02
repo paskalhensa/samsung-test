@@ -125,7 +125,7 @@ public class DeviceService {
     }
 
     private Integer getDefaultValue(Connection connection, Integer deviceId) throws SQLException {
-        String script = "SELECT default_value FROM devices WHERE id = ? AND deleted_at IS NOT NULL";
+        String script = "SELECT default_value FROM devices WHERE id = ? AND deleted_at IS NULL";
         try (PreparedStatement statement = connection.prepareStatement(script)) {
             statement.setInt(1, deviceId);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -215,7 +215,7 @@ public class DeviceService {
     }
 
     private Integer updateDevice(Connection connection, UpdateDeviceDto device, Integer userId) throws SQLException {
-        String script = "UPDATE devices SET brand_name = ?, device_name = ?, device_description = ?, min_value = ?, max_value = ?, default_value = ?, updated_at = ? WHERE id = ? AND user_id = ? AND deleted_at IS NOT NULL";
+        String script = "UPDATE devices SET brand_name = ?, device_name = ?, device_description = ?, min_value = ?, max_value = ?, default_value = ?, updated_at = ? WHERE id = ? AND user_id = ? AND deleted_at IS NULL";
         try (PreparedStatement statement = connection.prepareStatement(script)) {
             statement.setString(1, device.brandName());
             statement.setString(2, device.deviceName());
