@@ -243,7 +243,7 @@ public class DeviceService {
     }
 
     public List<GetVendorDeviceDto> getVendorDevice() throws SQLException {
-        String script = "SELECT brand_name, COUNT(DISTINCT ud.user_id) count FROM devices d JOIN user_devices ud ON d.id = ud.device_id GROUP BY d.id, brand_name";
+        String script = "SELECT device_name, COUNT(DISTINCT ud.user_id) count FROM devices d JOIN user_devices ud ON d.id = ud.device_id GROUP BY d.id, device_name";
         try (Connection connection = DataSourceProvider.getDataSource().getConnection();
              Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(script)) {
             List<GetVendorDeviceDto> devices = new ArrayList<>();
