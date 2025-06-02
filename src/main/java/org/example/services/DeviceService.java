@@ -256,4 +256,22 @@ public class DeviceService {
             return devices;
         }
     }
+
+    public List<GetUserDeviceDto> getUserDevice() throws SQLException {
+        String script = "SELECT username, full_name,  COUNT(DISTINCT ud.device_id) count FROM users u " +
+                "JOIN user_devices ud ON u.id = ud.user_id " +
+                "JOIN smartthings_user_profiles sup ON u.id = sup.user_id GROUP BY u.id, username, full_name";
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection();
+             Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(script)) {
+            List<GetUserDeviceDto> devices = new ArrayList<>();
+            while (resultSet.next()){
+                devices.add(new GetUserDeviceDto(
+                        resultSet.getString("username"),
+                        resultSet.getString("full_name"),
+                        resultSet.getInt("count")
+                ));
+            }
+            return devices;
+        }
+    }
 }

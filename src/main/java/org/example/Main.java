@@ -28,6 +28,7 @@ public class Main {
                     bindings.bind(UpdateDeviceHandler.class);
                     bindings.bind(DeleteDeviceHandler.class);
                     bindings.bind(GetVendorDeviceHandler.class);
+                    bindings.bind(GetUserDeviceHandler.class);
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
@@ -59,6 +60,7 @@ public class Main {
                                 .prefix("admin", admin -> admin
                                         .all(new AuthHandler("admin"))
                                         .get("devices", GetVendorDeviceHandler.class)
+                                        .get("users", GetUserDeviceHandler.class)
                                 )
                         )
                 )
