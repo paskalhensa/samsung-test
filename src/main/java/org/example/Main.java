@@ -29,6 +29,7 @@ public class Main {
                     bindings.bind(DeleteDeviceHandler.class);
                     bindings.bind(GetVendorDeviceHandler.class);
                     bindings.bind(GetUserDeviceHandler.class);
+                    bindings.bind(UserInformationHandler.class);
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
@@ -61,6 +62,7 @@ public class Main {
                                         .all(new AuthHandler("admin"))
                                         .get("devices", GetVendorDeviceHandler.class)
                                         .get("users", GetUserDeviceHandler.class)
+                                        .get("user-information", UserInformationHandler.class)
                                 )
                         )
                 )
