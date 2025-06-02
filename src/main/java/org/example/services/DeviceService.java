@@ -175,4 +175,15 @@ public class DeviceService {
             }
         }
     }
+
+    public void unregisterDevice(Integer userId, UnregisterDeviceDto device) throws SQLException {
+        String script = "DELETE FROM user_devices WHERE id = ? AND user_id = ?";
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setInt(1, device.userDeviceId());
+            statement.setInt(2, userId);
+            if(statement.executeUpdate() == 0){
+                throw new SQLException("Device to be unregistered not found.");
+            }
+        }
+    }
 }
