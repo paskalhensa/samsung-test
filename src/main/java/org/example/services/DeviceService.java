@@ -58,7 +58,7 @@ public class DeviceService {
     }
 
     public List<GetDeviceDto> getDevice(Integer id) throws SQLException {
-        String script = "SELECT brand_name, device_name, device_description FROM devices WHERE user_id = ?";
+        String script = "SELECT brand_name, device_name, device_description FROM devices WHERE user_id = ? AND deleted_at IS NULL";
         try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
             statement.setInt(1, id);
             List<GetDeviceDto> devices = new ArrayList<>();
@@ -78,7 +78,7 @@ public class DeviceService {
     public List<AvailableDeviceDto> getAvailableDevice(Integer id) throws SQLException {
         String script = "SELECT d.id, brand_name, device_name, device_description, min_value, max_value, default_value FROM " +
                 "devices d JOIN device_target_countries dtc ON d.id = dtc.device_id " +
-                "JOIN smartthings_user_profiles sup ON sup.country_code = dtc.country_code WHERE sup.user_id = ?";
+                "JOIN smartthings_user_profiles sup ON sup.country_code = dtc.country_code WHERE sup.user_id = ? AND d.deleted_at IS NULL";
         try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
             statement.setInt(1, id);
             List<AvailableDeviceDto> devices = new ArrayList<>();
@@ -125,7 +125,7 @@ public class DeviceService {
     }
 
     private Integer getDefaultValue(Connection connection, Integer deviceId) throws SQLException {
-        String script = "SELECT default_value FROM devices WHERE id = ?";
+        String script = "SELECT default_value FROM devices WHERE id = ? AND deleted_at IS NOT NULL";
         try (PreparedStatement statement = connection.prepareStatement(script)) {
             statement.setInt(1, deviceId);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -215,7 +215,7 @@ public class DeviceService {
     }
 
     private Integer updateDevice(Connection connection, UpdateDeviceDto device, Integer userId) throws SQLException {
-        String script = "UPDATE devices SET brand_name = ?, device_name = ?, device_description = ?, min_value = ?, max_value = ?, default_value = ?, updated_at = ? WHERE id = ? AND user_id = ?";
+        String script = "UPDATE devices SET brand_name = ?, device_name = ?, device_description = ?, min_value = ?, max_value = ?, default_value = ?, updated_at = ? WHERE id = ? AND user_id = ? AND deleted_at IS NOT NULL";
         try (PreparedStatement statement = connection.prepareStatement(script)) {
             statement.setString(1, device.brandName());
             statement.setString(2, device.deviceName());
@@ -227,6 +227,18 @@ public class DeviceService {
             statement.setInt(8, device.id());
             statement.setInt(9, userId);
             return statement.executeUpdate();
+        }
+    }
+
+    public void deleteDevice(Integer userId, Integer deviceId) throws SQLException {
+        String script = "UPDATE devices SET deleted_at = ? WHERE user_id = ? AND id = ?";
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setInt(2, userId);
+            statement.setInt(3, deviceId);
+            if (statement.executeUpdate() == 0) {
+                throw new SQLException("Device to be deleted not found.");
+            }
         }
     }
 }
