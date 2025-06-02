@@ -25,6 +25,7 @@ public class Main {
                     bindings.bind(GetRegisteredDeviceHandler.class);
                     bindings.bind(UpdateValueHandler.class);
                     bindings.bind(UnregisterDeviceHandler.class);
+                    bindings.bind(UpdateDeviceHandler.class);
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
@@ -36,6 +37,7 @@ public class Main {
                                                 .byMethod(method -> method
                                                         .get(GetDeviceHandler.class)
                                                         .post(CreateDeviceHandler.class)
+                                                        .put(UpdateDeviceHandler.class)
                                                 )
                                         )
                                 )

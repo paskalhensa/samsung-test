@@ -170,7 +170,7 @@ public class DeviceService {
             statement.setInt(1, device.value());
             statement.setInt(2, device.userDeviceId());
             statement.setInt(3, userId);
-            if(statement.executeUpdate() == 0){
+            if (statement.executeUpdate() == 0) {
                 throw new SQLException("Device to be updated not found.");
             }
         }
@@ -181,9 +181,52 @@ public class DeviceService {
         try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
             statement.setInt(1, device.userDeviceId());
             statement.setInt(2, userId);
-            if(statement.executeUpdate() == 0){
+            if (statement.executeUpdate() == 0) {
                 throw new SQLException("Device to be unregistered not found.");
             }
+        }
+    }
+
+    public void updateVendorDevice(Integer userId, UpdateDeviceDto device) throws SQLException {
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                if (updateDevice(connection, device, userId) == 0) {
+                    throw new SQLException("Device to be updated not found.");
+                }
+                deleteTargetCountry(connection, device.id());
+                for (String country : device.targetCountry()) {
+                    insertTargetCountry(connection, device.id(), country);
+                }
+                connection.commit();
+            } catch (Exception e) {
+                connection.rollback();
+                throw e;
+            }
+        }
+    }
+
+    private void deleteTargetCountry(Connection connection, Integer deviceId) throws SQLException {
+        String script = "DELETE FROM device_target_countries WHERE device_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setInt(1, deviceId);
+            statement.executeUpdate();
+        }
+    }
+
+    private Integer updateDevice(Connection connection, UpdateDeviceDto device, Integer userId) throws SQLException {
+        String script = "UPDATE devices SET brand_name = ?, device_name = ?, device_description = ?, min_value = ?, max_value = ?, default_value = ?, updated_at = ? WHERE id = ? AND user_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setString(1, device.brandName());
+            statement.setString(2, device.deviceName());
+            statement.setString(3, device.deviceDescription());
+            statement.setInt(4, device.deviceConfiguration().minValue());
+            statement.setInt(5, device.deviceConfiguration().maxValue());
+            statement.setInt(6, device.deviceConfiguration().defaultValue());
+            statement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setInt(8, device.id());
+            statement.setInt(9, userId);
+            return statement.executeUpdate();
         }
     }
 }
