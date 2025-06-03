@@ -1,6 +1,8 @@
 package org.example.services;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 import org.example.dtos.*;
+import org.example.exceptions.ClientInputException;
 import org.example.utils.DataSourceProvider;
 
 import java.sql.*;
@@ -32,6 +34,11 @@ public class DeviceService {
             statement.setString(1, country);
             statement.setInt(2, deviceId);
             statement.executeUpdate();
+        } catch (SQLServerException e) {
+            if ("23000".equals(e.getSQLState())) {
+                throw new ClientInputException("Invalid country code: " + country);
+            }
+            throw e;
         }
     }
 
@@ -247,7 +254,7 @@ public class DeviceService {
         try (Connection connection = DataSourceProvider.getDataSource().getConnection();
              Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(script)) {
             List<GetVendorDeviceDto> devices = new ArrayList<>();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 devices.add(new GetVendorDeviceDto(
                         resultSet.getString("device_name"),
                         resultSet.getInt("count")
@@ -264,7 +271,7 @@ public class DeviceService {
         try (Connection connection = DataSourceProvider.getDataSource().getConnection();
              Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(script)) {
             List<GetUserDeviceDto> devices = new ArrayList<>();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 devices.add(new GetUserDeviceDto(
                         resultSet.getString("username"),
                         resultSet.getString("full_name"),

@@ -18,6 +18,7 @@ public class Main {
                 .registry(Guice.registry(bindings -> {
                     bindings.bindInstance(DataSource.class, DataSourceProvider.getDataSource());
                     bindings.bindInstance(ObjectMapper.class, new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
+                    bindings.bind(CustomErrorHandler.class);
                     bindings.bind(DeviceService.class);
                     bindings.bind(UserService.class);
                     bindings.bind(CreateDeviceHandler.class);
