@@ -1,5 +1,6 @@
 package org.example;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.handlers.*;
@@ -16,7 +17,7 @@ public class Main {
         RatpackServer.start(server -> server
                 .registry(Guice.registry(bindings -> {
                     bindings.bindInstance(DataSource.class, DataSourceProvider.getDataSource());
-                    bindings.bindInstance(ObjectMapper.class, new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
+                    bindings.bindInstance(ObjectMapper.class, new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL).configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
                     bindings.bind(DeviceService.class);
                     bindings.bind(UserService.class);
                     bindings.bind(CreateDeviceHandler.class);

@@ -1,9 +1,9 @@
 package org.example.handlers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dtos.RegisterUserDto;
 import org.example.dtos.ResponseDto;
 import org.example.services.UserService;
+import org.example.utils.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ratpack.core.handling.Context;
@@ -25,10 +25,10 @@ public class RegisterHandler implements Handler {
         context.parse(RegisterUserDto.class).then(user -> {
             try {
                 userService.createUser(user);
-                context.getResponse().status(201).send(new ObjectMapper().writeValueAsString(new ResponseDto(true, "User successfully created", null, null)));
+                ResponseUtil.generateResponse(context, 201, new ResponseDto(true, "User successfully created", null, null));
             } catch (SQLException e) {
                 log.error(e.toString());
-                context.getResponse().status(500).send(new ObjectMapper().writeValueAsString(new ResponseDto(false, "Failed to create User", null, null)));
+                ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to create User", null, null));
             }
         });
     }

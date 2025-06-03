@@ -1,11 +1,11 @@
 package org.example.handlers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dtos.LoginRequestDto;
 import org.example.dtos.ResponseDto;
 import org.example.dtos.UsersDto;
 import org.example.services.UserService;
 import org.example.utils.JwtUtil;
+import org.example.utils.ResponseUtil;
 import org.mindrot.jbcrypt.BCrypt;
 import ratpack.core.handling.Context;
 import ratpack.core.handling.Handler;
@@ -26,9 +26,9 @@ public class LoginHandler implements Handler {
         context.parse(LoginRequestDto.class).then(login -> {
             UsersDto user = userService.findByUsername(login.username());
             if (user == null || !BCrypt.checkpw(login.password(), user.password())) {
-                context.getResponse().status(401).send(new ObjectMapper().writeValueAsString(new ResponseDto(false, "Invalid credentials", null, null)));
+                ResponseUtil.generateResponse(context, 401, new ResponseDto(false, "Invalid credentials", null, null));
             } else {
-                context.getResponse().status(200).send(new ObjectMapper().writeValueAsString(new ResponseDto(true, "Login Success", Map.of("token", JwtUtil.generateToken(user.id(), user.username(), user.role())), null)));
+                ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "Login Success", Map.of("token", JwtUtil.generateToken(user.id(), user.username(), user.role())), null));
             }
         });
     }

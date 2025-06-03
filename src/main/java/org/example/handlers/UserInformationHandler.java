@@ -1,9 +1,9 @@
 package org.example.handlers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dtos.ResponseDto;
 import org.example.dtos.UserInformationDto;
 import org.example.services.UserService;
+import org.example.utils.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ratpack.core.handling.Context;
@@ -25,10 +25,10 @@ public class UserInformationHandler implements Handler {
     public void handle(Context context) throws Exception {
         try {
             List<UserInformationDto> users = userService.getUserInformation();
-            context.getResponse().status(200).send(new ObjectMapper().writeValueAsString(new ResponseDto(true, "User information found", users, null)));
+            ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "User information found", users, null));
         } catch (SQLException e) {
             log.error(e.toString());
-            context.getResponse().status(500).send(new ObjectMapper().writeValueAsString(new ResponseDto(false, "Failed to get user information", null, null)));
+            ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to get user information", null, null));
         }
     }
 }

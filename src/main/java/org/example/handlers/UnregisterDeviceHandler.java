@@ -1,10 +1,10 @@
 package org.example.handlers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dtos.AuthenticatedUserDto;
 import org.example.dtos.ResponseDto;
 import org.example.dtos.UnregisterDeviceDto;
 import org.example.services.DeviceService;
+import org.example.utils.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ratpack.core.handling.Context;
@@ -28,10 +28,10 @@ public class UnregisterDeviceHandler implements Handler {
         context.parse(UnregisterDeviceDto.class).then(device -> {
             try {
                 deviceService.unregisterDevice(user.id(), device);
-                context.getResponse().status(200).send(new ObjectMapper().writeValueAsString(new ResponseDto(true, "Device successfully unregistered", null, null)));
+                ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "Device successfully unregistered", null, null));
             } catch (SQLException e) {
                 log.error(e.toString());
-                context.getResponse().status(500).send(new ObjectMapper().writeValueAsString(new ResponseDto(false, "Failed to unregister device", null, List.of(e.getMessage()))));
+                ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to unregister device", null, List.of(e.getMessage())));
             }
         });
     }

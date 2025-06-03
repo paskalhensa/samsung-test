@@ -1,9 +1,9 @@
 package org.example.handlers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dtos.GetVendorDeviceDto;
 import org.example.dtos.ResponseDto;
 import org.example.services.DeviceService;
+import org.example.utils.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ratpack.core.handling.Context;
@@ -26,10 +26,10 @@ public class GetVendorDeviceHandler implements Handler {
     public void handle(Context context) throws Exception {
         try {
             List<GetVendorDeviceDto> devices = deviceService.getVendorDevice();
-            context.getResponse().status(200).send(new ObjectMapper().writeValueAsString(new ResponseDto(true, "Devices found", devices, null)));
+            ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "Devices found", devices, null));
         } catch (SQLException e) {
             log.error(e.toString());
-            context.getResponse().status(500).send(new ObjectMapper().writeValueAsString(new ResponseDto(false, "Failed to get device", null, null)));
+            ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to get device", null, null));
         }
     }
 }

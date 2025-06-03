@@ -1,10 +1,10 @@
 package org.example.handlers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.dtos.AuthenticatedUserDto;
 import org.example.dtos.ResponseDto;
 import org.example.dtos.UpdateDeviceDto;
 import org.example.services.DeviceService;
+import org.example.utils.ResponseUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ratpack.core.handling.Context;
@@ -29,10 +29,10 @@ public class UpdateDeviceHandler implements Handler {
         context.parse(UpdateDeviceDto.class).then(device -> {
             try {
                 deviceService.updateVendorDevice(user.id(), device);
-                context.getResponse().status(200).send(new ObjectMapper().writeValueAsString(new ResponseDto(true, "Device successfully Updated", null, null)));
+                ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "Device successfully Updated", null, null));
             } catch (SQLException e) {
                 log.error(e.toString());
-                context.getResponse().status(500).send(new ObjectMapper().writeValueAsString(new ResponseDto(false, "Failed to update device", null, List.of(e.getMessage()))));
+                ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to update device", null, List.of(e.getMessage())));
             }
         });
     }
