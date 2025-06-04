@@ -195,7 +195,7 @@ public class DeviceService {
             statement.setInt(1, device.userDeviceId());
             statement.setInt(2, userId);
             if (statement.executeUpdate() == 0) {
-                throw new SQLException("Device to be unregistered not found.");
+                throw new InvalidDataException("Device to be unregistered not found.");
             }
         }
     }
@@ -205,7 +205,7 @@ public class DeviceService {
             connection.setAutoCommit(false);
             try {
                 if (updateDevice(connection, device, userId) == 0) {
-                    throw new SQLException("Device to be updated not found.");
+                    throw new InvalidDataException("Device to be updated not found.");
                 }
                 deleteTargetCountry(connection, device.id());
                 insertTargetCountry(connection, device.id(), device.targetCountry());
@@ -248,7 +248,7 @@ public class DeviceService {
             statement.setInt(2, userId);
             statement.setInt(3, deviceId);
             if (statement.executeUpdate() == 0) {
-                throw new SQLException("Device to be deleted not found.");
+                throw new InvalidDataException("Device to be deleted not found.");
             }
         }
     }
