@@ -308,6 +308,27 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Device Information",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5050/api/vendor/device-information",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5050",
+							"path": [
+								"api",
+								"vendor",
+								"device-information"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"auth": {

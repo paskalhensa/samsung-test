@@ -9,7 +9,9 @@ import org.example.utils.DataSourceProvider;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DeviceService {
 
@@ -283,6 +285,43 @@ public class DeviceService {
                 ));
             }
             return devices;
+        }
+    }
+
+    public List<DeviceInformationDto> getDeviceInformation(Integer id) throws SQLException {
+        String script = "SELECT d.id, brand_name, device_name, device_description, min_value, max_value, default_value, c.code, c.country_name " +
+                "FROM devices d " +
+                "JOIN device_target_countries dtc ON d.id = dtc.device_id JOIN countries c ON c.code = dtc.country_code " +
+                "WHERE user_id = ? AND deleted_at IS NULL";
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setInt(1, id);
+            Map<Integer, DeviceInformationDto> deviceMap = new HashMap<>();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Integer deviceId = resultSet.getInt("id");
+                    DeviceInformationDto deviceDto = deviceMap.get(deviceId);
+                    if(deviceDto == null){
+                        deviceDto = new DeviceInformationDto(
+                                deviceId,
+                                resultSet.getString("brand_name"),
+                                resultSet.getString("device_name"),
+                                resultSet.getString("device_description"),
+                                new ArrayList<>(),
+                                new CreateDeviceDto.DeviceConfigurationDto(
+                                                resultSet.getInt("min_value"),
+                                                resultSet.getInt("max_value"),
+                                                resultSet.getInt("default_value")
+                                )
+                        );
+                        deviceMap.put(deviceId, deviceDto);
+                    }
+                    deviceDto.getTargetCountry().add(new DeviceInformationDto.CountryDto(
+                            resultSet.getString("code"),
+                            resultSet.getString("country_name")
+                    ));
+                }
+                return new ArrayList<>(deviceMap.values());
+            }
         }
     }
 }

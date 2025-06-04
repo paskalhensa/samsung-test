@@ -35,6 +35,7 @@ public class Main {
                     bindings.bind(GetVendorDeviceHandler.class);
                     bindings.bind(GetUserDeviceHandler.class);
                     bindings.bind(UserInformationHandler.class);
+                    bindings.bind(GetDeviceInformationHandler.class);
                 }))
                 .handlers(chain -> chain
                         .post("login", LoginHandler.class)
@@ -42,6 +43,7 @@ public class Main {
                         .prefix("api", api -> api
                                 .prefix("vendor", vendor -> vendor
                                         .all(new AuthHandler("vendor"))
+                                        .get("device-information", GetDeviceInformationHandler.class)
                                         .path("devices", devices -> devices
                                                 .byMethod(method -> method
                                                         .get(GetDeviceHandler.class)

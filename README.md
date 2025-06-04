@@ -358,6 +358,84 @@ Example response:\
 }
 ```
 
+#### /api/vendor/device-information
+
+* `GET`: get all device information owned.
+  Example response:\
+  `200` Success get device information
+
+```json
+{
+  "success": true,
+  "message": "devices found",
+  "data": [
+    {
+      "id": 1,
+      "brandName": "Cool Brand Name",
+      "deviceName": "A Cooler Device Name",
+      "description": "Device Description",
+      "targetCountry": [
+        {
+          "code": "FR",
+          "countryName": "France"
+        },
+        {
+          "code": "ID",
+          "countryName": "Indonesia"
+        }
+      ],
+      "deviceConfiguration": {
+        "minValue": 16,
+        "maxValue": 30,
+        "defaultValue": 25
+      }
+    },
+    {
+      "id": 1,
+      "brandName": "Cool Brand Name",
+      "deviceName": "A Cooler Device Name",
+      "description": "Device Description",
+      "targetCountry": [
+        {
+          "code": "FR",
+          "countryName": "France"
+        },
+        {
+          "code": "ID",
+          "countryName": "Indonesia"
+        }
+      ],
+      "deviceConfiguration": {
+        "minValue": 16,
+        "maxValue": 30,
+        "defaultValue": 25
+      }
+    },
+    {
+      "id": 3,
+      "brandName": "Another Brand Name",
+      "deviceName": "Another Device Name",
+      "description": "Device Description 3",
+      "targetCountry": [
+        {
+          "code": "FR",
+          "countryName": "France"
+        },
+        {
+          "code": "ID",
+          "countryName": "Indonesia"
+        }
+      ],
+      "deviceConfiguration": {
+        "minValue": 16,
+        "maxValue": 30,
+        "defaultValue": 25
+      }
+    }
+  ]
+}
+```
+
 ### User Endpoints
 
 Required role to access these endpoints is `user`. Users without the required role will be given the response below
