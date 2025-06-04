@@ -19,6 +19,6 @@ public class ValidatorUtil {
 
     public static <T> List<String> validate(T object){
         Set<ConstraintViolation<T>> violations = validator.validate(object);
-        return violations.stream().map(ConstraintViolation::getMessage).toList();
+        return violations.stream().map(v -> "%s: %s".formatted(v.getPropertyPath(), v.getMessage())).toList();
     }
 }

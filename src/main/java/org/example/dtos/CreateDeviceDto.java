@@ -1,13 +1,18 @@
 package org.example.dtos;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.example.annotations.ValidDeviceConfiguration;
 
 import java.util.List;
 
-public record CreateDeviceDto(@Size(max = 100) String brandName, @Size(max = 150) String deviceName, String deviceDescription, List<String> targetCountry,
-                              DeviceConfigurationDto deviceConfiguration) {
-
-    public record DeviceConfigurationDto(Integer minValue, Integer maxValue, Integer defaultValue) {
+public record CreateDeviceDto(@Size(max = 100) @NotBlank String brandName, @Size(max = 150) @NotBlank String deviceName,
+                              String deviceDescription, List<@NotBlank @Size(min = 2, max = 2) String> targetCountry,
+                              @Valid @NotNull DeviceConfigurationDto deviceConfiguration) {
+    @ValidDeviceConfiguration
+    public record DeviceConfigurationDto(@NotNull Integer minValue, @NotNull Integer maxValue, @NotNull Integer defaultValue) {
     }
 }
 

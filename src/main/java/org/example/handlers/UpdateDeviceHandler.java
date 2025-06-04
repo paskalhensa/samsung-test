@@ -5,6 +5,7 @@ import org.example.dtos.ResponseDto;
 import org.example.dtos.UpdateDeviceDto;
 import org.example.services.DeviceService;
 import org.example.utils.ResponseUtil;
+import org.example.utils.ValidatorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ratpack.core.handling.Context;
@@ -27,6 +28,11 @@ public class UpdateDeviceHandler implements Handler {
     public void handle(Context context) throws Exception {
         AuthenticatedUserDto user = context.get(AuthenticatedUserDto.class);
         context.parse(UpdateDeviceDto.class).then(device -> {
+            List<String> errors = ValidatorUtil.validate(device);
+            if(!errors.isEmpty()){
+                ResponseUtil.generateResponse(context, 400, new ResponseDto(false, "Validation failed when updating device", null, errors));
+                return;
+            }
             try {
                 deviceService.updateVendorDevice(user.id(), device);
                 ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "Device successfully Updated", null, null));

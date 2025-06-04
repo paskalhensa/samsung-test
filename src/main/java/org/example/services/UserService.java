@@ -1,8 +1,10 @@
 package org.example.services;
 
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 import org.example.dtos.RegisterUserDto;
 import org.example.dtos.UserInformationDto;
 import org.example.dtos.UsersDto;
+import org.example.exceptions.ClientInputException;
 import org.example.utils.DataSourceProvider;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -10,6 +12,7 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +58,8 @@ public class UserService {
             statement.setString(4, user.address());
             statement.setString(5, user.country());
             statement.executeUpdate();
+        } catch (DateTimeParseException e){
+            throw new ClientInputException("Failed to parse date. Please use 'yyyy-MM-dd' format");
         }
     }
 
@@ -73,6 +78,11 @@ public class UserService {
                     throw new SQLException("Failed to retrieve user Id");
                 }
             }
+        } catch (SQLServerException e) {
+            if ("23000".equals(e.getSQLState())) {
+                throw new ClientInputException("Username already used.");
+            }
+            throw e;
         }
     }
 

@@ -3,6 +3,7 @@ package org.example.handlers;
 import org.example.dtos.AuthenticatedUserDto;
 import org.example.dtos.RegisterDeviceDto;
 import org.example.dtos.ResponseDto;
+import org.example.exceptions.InvalidDataException;
 import org.example.services.DeviceService;
 import org.example.utils.ResponseUtil;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import ratpack.core.handling.Handler;
 
 import javax.inject.Inject;
 import java.sql.SQLException;
+import java.util.Collections;
 
 public class RegisterDeviceHandler implements Handler {
     private static final Logger log = LoggerFactory.getLogger(RegisterDeviceHandler.class);
@@ -29,7 +31,9 @@ public class RegisterDeviceHandler implements Handler {
             try {
                 deviceService.registerDevice(user.id(), device.deviceId());
                 ResponseUtil.generateResponse(context, 201, new ResponseDto(true, "Device successfully registered", null, null));
-            } catch (SQLException e) {
+            } catch (InvalidDataException e) {
+                ResponseUtil.generateResponse(context, 422, new ResponseDto(false, "Failed to register device", null, Collections.singletonList(e.getMessage())));
+            }catch (SQLException e) {
                 log.error(e.toString());
                 ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to register device", null, null));
             }

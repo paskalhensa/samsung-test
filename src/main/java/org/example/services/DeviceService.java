@@ -3,6 +3,7 @@ package org.example.services;
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 import org.example.dtos.*;
 import org.example.exceptions.ClientInputException;
+import org.example.exceptions.InvalidDataException;
 import org.example.utils.DataSourceProvider;
 
 import java.sql.*;
@@ -17,9 +18,7 @@ public class DeviceService {
             connection.setAutoCommit(false);
             try {
                 Integer deviceId = insertDevice(connection, device, userId);
-                for (String country : device.targetCountry()) {
-                    insertTargetCountry(connection, deviceId, country);
-                }
+                insertTargetCountry(connection, deviceId, device.targetCountry());
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
@@ -28,18 +27,22 @@ public class DeviceService {
         }
     }
 
-    private void insertTargetCountry(Connection connection, Integer deviceId, String country) throws SQLException {
-        String script = "INSERT INTO device_target_countries (country_code, device_id) VALUES (?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(script)) {
-            statement.setString(1, country);
-            statement.setInt(2, deviceId);
-            statement.executeUpdate();
-        } catch (SQLServerException e) {
-            if ("23000".equals(e.getSQLState())) {
-                throw new ClientInputException("Invalid country code: " + country);
+    private void insertTargetCountry(Connection connection, Integer deviceId, List<String> targetCountries) throws SQLException {
+        if (targetCountries != null) {
+            String script = "INSERT INTO device_target_countries (country_code, device_id) VALUES (?, " + deviceId + ")";
+            for (String country : targetCountries) {
+                try (PreparedStatement statement = connection.prepareStatement(script)) {
+                    statement.setString(1, country);
+                    statement.executeUpdate();
+                } catch (SQLServerException e) {
+                    if ("23000".equals(e.getSQLState())) {
+                        throw new ClientInputException("Invalid country code: " + country);
+                    }
+                    throw e;
+                }
             }
-            throw e;
         }
+
     }
 
     private Integer insertDevice(Connection connection, CreateDeviceDto device, Integer userId) throws SQLException {
@@ -108,39 +111,15 @@ public class DeviceService {
     }
 
     public void registerDevice(Integer userId, Integer deviceId) throws SQLException {
-        try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
-            Integer defaultValue = getDefaultValue(connection, deviceId);
-            connection.setAutoCommit(false);
-            try {
-                insertUserDevice(connection, userId, deviceId, defaultValue);
-                connection.commit();
-            } catch (Exception e) {
-                connection.rollback();
-                throw e;
-            }
-        }
-    }
-
-    private void insertUserDevice(Connection connection, Integer userId, Integer deviceId, Integer defaultValue) throws SQLException {
-        String script = "INSERT INTO user_devices (user_id, device_id, current_value) VALUES (?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(script)) {
-            statement.setInt(1, userId);
-            statement.setInt(2, deviceId);
-            statement.setInt(3, defaultValue);
-            statement.executeUpdate();
-        }
-    }
-
-    private Integer getDefaultValue(Connection connection, Integer deviceId) throws SQLException {
-        String script = "SELECT default_value FROM devices WHERE id = ? AND deleted_at IS NULL";
-        try (PreparedStatement statement = connection.prepareStatement(script)) {
+        String script = "INSERT INTO user_devices (user_id, device_id, current_value) SELECT sup.user_id, d.id, d.default_value " +
+                "FROM devices d JOIN device_target_countries dtc ON d.id = dtc.device_id " +
+                "JOIN smartthings_user_profiles sup ON dtc.country_code = sup.country_code " +
+                "WHERE d.id = ? AND sup.user_id = ? AND d.deleted_at IS NULL";
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
             statement.setInt(1, deviceId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    return resultSet.getInt(1);
-                } else {
-                    throw new SQLException("Failed to retrieve device's default value");
-                }
+            statement.setInt(2, userId);
+            if (statement.executeUpdate() == 0) {
+                throw new InvalidDataException("Device is not available in user's country or does not exist");
             }
         }
     }
@@ -202,9 +181,7 @@ public class DeviceService {
                     throw new SQLException("Device to be updated not found.");
                 }
                 deleteTargetCountry(connection, device.id());
-                for (String country : device.targetCountry()) {
-                    insertTargetCountry(connection, device.id(), country);
-                }
+                insertTargetCountry(connection, device.id(), device.targetCountry());
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
@@ -238,7 +215,7 @@ public class DeviceService {
     }
 
     public void deleteDevice(Integer userId, Integer deviceId) throws SQLException {
-        String script = "UPDATE devices SET deleted_at = ? WHERE user_id = ? AND id = ?";
+        String script = "UPDATE devices SET deleted_at = ? WHERE user_id = ? AND id = ? AND deleted_at IS NULL";
         try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
             statement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
             statement.setInt(2, userId);
