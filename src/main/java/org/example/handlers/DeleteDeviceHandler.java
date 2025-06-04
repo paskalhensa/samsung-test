@@ -33,15 +33,18 @@ public class DeleteDeviceHandler implements Handler {
             try {
                 List<String> errors = ValidatorUtil.validate(device);
                 if(!errors.isEmpty()){
+                    log.error("{} failed to delete device {} because of validation: {}", user.id(), device.deviceId(), errors);
                     ResponseUtil.generateResponse(context, 400, new ResponseDto(false, "Validation failed when deleting device", null, errors));
                     return;
                 }
                 deviceService.deleteDevice(user.id(), device.deviceId());
+                log.info("{} deleted device {}", user.id(), device.deviceId());
                 ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "Device successfully deleted", null, null));
             } catch (InvalidDataException e) {
+                log.error("{} failed to delete device {} with error: {}", user.id(), device.deviceId(), e.toString());
                 ResponseUtil.generateResponse(context, 422, new ResponseDto(false, "Failed to delete device", null, Collections.singletonList(e.getMessage())));
             } catch (SQLException e) {
-                log.error(e.toString());
+                log.error("{} failed to delete device {} with error: {}", user.id(), device.deviceId(), e.toString());
                 ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to delete device", null, List.of(e.getMessage())));
             }
         });

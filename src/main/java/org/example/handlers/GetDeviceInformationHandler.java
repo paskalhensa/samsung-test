@@ -28,9 +28,10 @@ public class GetDeviceInformationHandler implements Handler {
         try {
             List<DeviceInformationDto> devices = deviceService.getDeviceInformation(user.id());
             String message = devices.isEmpty() ? "No device found" : "devices found";
+            log.info("{} success get device information", user.id());
             ResponseUtil.generateResponse(context, 200, new ResponseDto(true, message, devices, null));
         } catch (SQLException e) {
-            log.error(e.toString());
+            log.error("{} failed to get device information", user.id());
             ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to get device", null, null));
         }
     }

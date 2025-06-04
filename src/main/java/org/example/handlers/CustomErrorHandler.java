@@ -19,7 +19,7 @@ public class CustomErrorHandler implements ServerErrorHandler {
     @Override
     public void error(Context context, Throwable throwable) throws Exception {
         if (log.isErrorEnabled()) {
-            log.error(throwable.toString());
+            log.error("Custom error caught {}", throwable.toString());
         }
         if (throwable instanceof InvalidFormatException exception) {
             String fullPath = exception.getPath().stream().map(JsonMappingException.Reference::getFieldName).filter(Objects::nonNull).collect(Collectors.joining("."));

@@ -31,17 +31,19 @@ public class CreateDeviceHandler implements Handler {
         ctx.parse(CreateDeviceDto.class).then(device -> {
             List<String> errors = ValidatorUtil.validate(device);
             if(!errors.isEmpty()){
+                log.error("{} failed to create device because of validation: {}", user.id(), errors);
                 ResponseUtil.generateResponse(ctx, 400, new ResponseDto(false, "Validation failed when creating device", null, errors));
                 return;
             }
             try {
                 deviceService.createDevice(device, user.id());
+                log.info("{} created a new device", user.id());
                 ResponseUtil.generateResponse(ctx, 201, new ResponseDto(true, "Device successfully created", null, null));
             } catch (ClientInputException e) {
-                log.error(e.toString());
+                log.error("{} failed to create device with error: {}", user.id(), e.toString());
                 ResponseUtil.generateResponse(ctx, 400, new ResponseDto(false, "Failed to create device", null, List.of(e.getMessage())));
             } catch (SQLException e) {
-                log.error(e.toString());
+                log.error("{} failed to create device with error: {}", user.id(), e.toString());
                 ResponseUtil.generateResponse(ctx, 500, new ResponseDto(false, "Failed to create device", null, null));
             }
         });

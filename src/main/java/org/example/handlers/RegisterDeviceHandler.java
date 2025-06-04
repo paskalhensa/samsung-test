@@ -33,15 +33,18 @@ public class RegisterDeviceHandler implements Handler {
             try {
                 List<String> errors = ValidatorUtil.validate(device);
                 if(!errors.isEmpty()){
+                    log.error("{} failed to register device {} because of validation: {}", user.id(), device.deviceId(), errors);
                     ResponseUtil.generateResponse(context, 400, new ResponseDto(false, "Validation failed when registering device", null, errors));
                     return;
                 }
                 deviceService.registerDevice(user.id(), device.deviceId());
+                log.info("{} registered device {}", user.id(), device.deviceId());
                 ResponseUtil.generateResponse(context, 201, new ResponseDto(true, "Device successfully registered", null, null));
             } catch (InvalidDataException e) {
+                log.error("{} failed to register device {} with error: {}", user.id(), device.deviceId(), e.toString());
                 ResponseUtil.generateResponse(context, 422, new ResponseDto(false, "Failed to register device", null, Collections.singletonList(e.getMessage())));
             } catch (SQLException e) {
-                log.error(e.toString());
+                log.error("{} failed to register device {} with error: {}", user.id(), device.deviceId(), e.toString());
                 ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to register device", null, null));
             }
         });

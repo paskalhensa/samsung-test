@@ -28,9 +28,10 @@ public class GetRegisteredDeviceHandler implements Handler {
         try {
             List<RegisteredDeviceDto> devices = deviceService.getRegisteredDevice(user.id());
             String message = devices.isEmpty() ? "No registered device found" : "Registered devices found";
+            log.info("{} success get registered device", user.id());
             ResponseUtil.generateResponse(context, 200, new ResponseDto(true, message, devices, null));
         } catch (SQLException e) {
-            log.error(e.toString());
+            log.error("{} failed to get registered device", user.id());
             ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to get registered device", null, null));
         }
     }

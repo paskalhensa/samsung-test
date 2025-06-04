@@ -32,15 +32,18 @@ public class UnregisterDeviceHandler implements Handler {
             try {
                 List<String> errors = ValidatorUtil.validate(device);
                 if(!errors.isEmpty()){
+                    log.error("{} failed to unregister user device {} because of validation: {}", user.id(), device.userDeviceId(), errors);
                     ResponseUtil.generateResponse(context, 400, new ResponseDto(false, "Validation failed when unregistering device", null, errors));
                     return;
                 }
                 deviceService.unregisterDevice(user.id(), device);
+                log.info("{} unregistered user device {}", user.id(), device.userDeviceId());
                 ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "Device successfully unregistered", null, null));
             } catch (InvalidDataException e) {
+                log.error("{} failed to unregister user device {} with error: {}", user.id(), device.userDeviceId(), e.toString());
                 ResponseUtil.generateResponse(context, 422, new ResponseDto(false, "Failed to unregister device", null, Collections.singletonList(e.getMessage())));
             } catch (SQLException e) {
-                log.error(e.toString());
+                log.error("{} failed to unregister user device {} with error: {}", user.id(), device.userDeviceId(), e.toString());
                 ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to unregister device", null, List.of(e.getMessage())));
             }
         });

@@ -7,6 +7,8 @@ import org.example.services.UserService;
 import org.example.utils.JwtUtil;
 import org.example.utils.ResponseUtil;
 import org.mindrot.jbcrypt.BCrypt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ratpack.core.handling.Context;
 import ratpack.core.handling.Handler;
 
@@ -14,6 +16,7 @@ import javax.inject.Inject;
 import java.util.Map;
 
 public class LoginHandler implements Handler {
+    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
     private final UserService userService;
 
     @Inject
@@ -26,8 +29,10 @@ public class LoginHandler implements Handler {
         context.parse(LoginRequestDto.class).then(login -> {
             UsersDto user = userService.findByUsername(login.username());
             if (user == null || !BCrypt.checkpw(login.password(), user.password())) {
+                log.info("{} failed to login", user != null ? user.username() : null);
                 ResponseUtil.generateResponse(context, 401, new ResponseDto(false, "Invalid credentials", null, null));
             } else {
+                log.error("{} success login", user.username());
                 ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "Login Success", Map.of("token", JwtUtil.generateToken(user.id(), user.username(), user.role())), null));
             }
         });

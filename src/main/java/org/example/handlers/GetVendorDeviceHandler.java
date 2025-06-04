@@ -27,9 +27,10 @@ public class GetVendorDeviceHandler implements Handler {
         try {
             List<GetVendorDeviceDto> devices = deviceService.getVendorDevice();
             String message = devices.isEmpty() ? "No device found" : "Devices found";
+            log.info("Success get vendor device");
             ResponseUtil.generateResponse(context, 200, new ResponseDto(true, message, devices, null));
         } catch (SQLException e) {
-            log.error(e.toString());
+            log.error("Failed to get vendor device");
             ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to get device", null, null));
         }
     }

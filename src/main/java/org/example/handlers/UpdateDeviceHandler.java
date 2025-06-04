@@ -32,16 +32,19 @@ public class UpdateDeviceHandler implements Handler {
         context.parse(UpdateDeviceDto.class).then(device -> {
             List<String> errors = ValidatorUtil.validate(device);
             if(!errors.isEmpty()){
+                log.error("{} failed to update device {} because of validation: {}", user.id(), device.id(), errors);
                 ResponseUtil.generateResponse(context, 400, new ResponseDto(false, "Validation failed when updating device", null, errors));
                 return;
             }
             try {
                 deviceService.updateVendorDevice(user.id(), device);
+                log.info("{} updated device {}", user.id(), device.id());
                 ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "Device successfully Updated", null, null));
             } catch (InvalidDataException e) {
+                log.error("{} failed to update device {} with error: {}", user.id(), device.id(), e.toString());
                 ResponseUtil.generateResponse(context, 422, new ResponseDto(false, "Failed to update device", null, Collections.singletonList(e.getMessage())));
             } catch (SQLException e) {
-                log.error(e.toString());
+                log.error("{} failed to update device {} with error: {}", user.id(), device.id(), e.toString());
                 ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to update device", null, List.of(e.getMessage())));
             }
         });
