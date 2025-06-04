@@ -1,4 +1,6 @@
 package org.example.dtos;
 
-public record UnregisterDeviceDto(Integer userDeviceId) {
+import jakarta.validation.constraints.NotNull;
+
+public record UnregisterDeviceDto(@NotNull Integer userDeviceId) {
 }

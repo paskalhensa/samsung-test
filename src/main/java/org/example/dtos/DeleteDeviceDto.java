@@ -1,4 +1,6 @@
 package org.example.dtos;
 
-public record DeleteDeviceDto(Integer deviceId) {
+import jakarta.validation.constraints.NotNull;
+
+public record DeleteDeviceDto(@NotNull Integer deviceId) {
 }

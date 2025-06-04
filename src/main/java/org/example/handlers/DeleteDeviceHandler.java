@@ -5,6 +5,7 @@ import org.example.dtos.DeleteDeviceDto;
 import org.example.dtos.ResponseDto;
 import org.example.services.DeviceService;
 import org.example.utils.ResponseUtil;
+import org.example.utils.ValidatorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ratpack.core.handling.Context;
@@ -28,6 +29,11 @@ public class DeleteDeviceHandler implements Handler {
         AuthenticatedUserDto user = context.get(AuthenticatedUserDto.class);
         context.parse(DeleteDeviceDto.class).then(device -> {
             try {
+                List<String> errors = ValidatorUtil.validate(device);
+                if(!errors.isEmpty()){
+                    ResponseUtil.generateResponse(context, 400, new ResponseDto(false, "Validation failed when deleting device", null, errors));
+                    return;
+                }
                 deviceService.deleteDevice(user.id(), device.deviceId());
                 ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "Device successfully deleted", null, null));
             } catch (SQLException e) {

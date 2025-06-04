@@ -151,13 +151,40 @@ public class DeviceService {
     }
 
     public void updateDeviceValue(Integer userId, UpdateValueDto device) throws SQLException {
+        try (Connection connection = DataSourceProvider.getDataSource().getConnection()) {
+            validateDeviceConfig(connection, userId, device);
+            updateUserDeviceValue(connection, userId, device);
+        }
+    }
+
+    private void validateDeviceConfig(Connection connection, Integer userId, UpdateValueDto device) throws SQLException {
+        String script = "SELECT d.min_value, d.max_value FROM user_devices ud JOIN devices d ON ud.device_id = d.id WHERE ud.id = ? AND ud.user_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(script)) {
+            statement.setInt(1, device.userDeviceId());
+            statement.setInt(2, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if(!resultSet.next()){
+                    throw new InvalidDataException("Device not found or not owned by user.");
+                }
+                int min = resultSet.getInt("min_value");
+                int max = resultSet.getInt("max_value");
+                int newValue = device.value();
+
+                if (newValue < min || newValue > max) {
+                    throw new ClientInputException("Value must be between " + min + " and " + max);
+                }
+            }
+        }
+    }
+
+    private void updateUserDeviceValue(Connection connection, Integer userId, UpdateValueDto device) throws SQLException {
         String script = "UPDATE user_devices SET current_value = ? WHERE id = ? AND user_id = ?";
-        try (Connection connection = DataSourceProvider.getDataSource().getConnection(); PreparedStatement statement = connection.prepareStatement(script)) {
+        try (PreparedStatement statement = connection.prepareStatement(script)) {
             statement.setInt(1, device.value());
             statement.setInt(2, device.userDeviceId());
             statement.setInt(3, userId);
             if (statement.executeUpdate() == 0) {
-                throw new SQLException("Device to be updated not found.");
+                throw new InvalidDataException("Device to be updated not found.");
             }
         }
     }

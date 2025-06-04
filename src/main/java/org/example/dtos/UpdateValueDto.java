@@ -1,4 +1,6 @@
 package org.example.dtos;
 
-public record UpdateValueDto(Integer userDeviceId, Integer value) {
+import jakarta.validation.constraints.NotNull;
+
+public record UpdateValueDto(@NotNull Integer userDeviceId, @NotNull Integer value) {
 }
