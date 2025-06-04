@@ -25,7 +25,8 @@ public class GetUserDeviceHandler implements Handler {
     public void handle(Context context) throws Exception {
         try {
             List<GetUserDeviceDto> devices = deviceService.getUserDevice();
-            ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "User device count found", devices, null));
+            String message = devices.isEmpty() ? "No user device found" : "User device count found";
+            ResponseUtil.generateResponse(context, 200, new ResponseDto(true, message, devices, null));
         } catch (SQLException e) {
             log.error(e.toString());
             ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to get user device count", null, null));

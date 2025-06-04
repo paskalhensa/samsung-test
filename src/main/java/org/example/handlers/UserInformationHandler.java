@@ -25,7 +25,8 @@ public class UserInformationHandler implements Handler {
     public void handle(Context context) throws Exception {
         try {
             List<UserInformationDto> users = userService.getUserInformation();
-            ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "User information found", users, null));
+            String message = users.isEmpty() ? "No user information found" : "User information found";
+            ResponseUtil.generateResponse(context, 200, new ResponseDto(true, message, users, null));
         } catch (SQLException e) {
             log.error(e.toString());
             ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to get user information", null, null));

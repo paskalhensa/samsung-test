@@ -27,7 +27,8 @@ public class GetAvailableDeviceHandler implements Handler {
         AuthenticatedUserDto user = context.get(AuthenticatedUserDto.class);
         try{
             List<AvailableDeviceDto> devices = deviceService.getAvailableDevice(user.id());
-            ResponseUtil.generateResponse(context, 200, new ResponseDto(true, "Available devices found", devices, null));
+            String message = devices.isEmpty() ? "No available device found" : "Available devices found";
+            ResponseUtil.generateResponse(context, 200, new ResponseDto(true, message, devices, null));
         } catch (SQLException e) {
             log.error(e.toString());
             ResponseUtil.generateResponse(context, 500, new ResponseDto(false, "Failed to get available device", null, null));
